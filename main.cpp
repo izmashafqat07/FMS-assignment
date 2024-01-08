@@ -153,148 +153,162 @@ public:
     }
 };
 
-void displayMenu() {
-    std::cout << "\n----- Real Estate Platform Menu -----\n";
-    std::cout << "1. Add Buyer\n";
-    std::cout << "2. Add Seller\n";
-    std::cout << "3. Add Residential Property\n";
-    std::cout << "4. Add Commercial Property\n";
-    std::cout << "5. Display Users\n";
-    std::cout << "6. Display Properties\n";
-    std::cout << "7. Buy Property\n";
-    std::cout << "8. Exit\n";
-    std::cout << "-------------------------------------\n";
-}
-
-int main() {
+class RealEstatePlatformTester {
+private:
     RealEstatePlatform platform;
 
-    int choice;
-    do {
-        displayMenu();
-        std::cout << "Enter your choice: ";
+public:
+    void run() {
+        int choice;
+        do {
+            displayMenu();
+            std::cout << "Enter your choice: ";
 
-        try {
-            std::cin >> choice;
+            try {
+                std::cin >> choice;
 
-            if (!std::cin.good()) {
+                if (!std::cin.good()) {
+                    std::cin.clear();
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    throw std::runtime_error("Invalid input. Please enter a number.");
+                }
+
+                handleChoice(choice);
+
+            } catch (const std::exception& e) {
+                std::cerr << "Error: " << e.what() << std::endl;
                 std::cin.clear();
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                throw std::runtime_error("Invalid input. Please enter a number.");
             }
 
-            switch (choice) {
-                case 1: {
-                    std::string username;
-                    std::cout << "Enter buyer's username: ";
-                    std::cin >> username;
-                    platform.addUser(new Buyer(username));
-                    break;
+        } while (choice != 8);
+    }
+
+private:
+    void displayMenu() {
+        std::cout << "\n----- Real Estate Platform Menu -----\n";
+        std::cout << "1. Add Buyer\n";
+        std::cout << "2. Add Seller\n";
+        std::cout << "3. Add Residential Property\n";
+        std::cout << "4. Add Commercial Property\n";
+        std::cout << "5. Display Users\n";
+        std::cout << "6. Display Properties\n";
+        std::cout << "7. Buy Property\n";
+        std::cout << "8. Exit\n";
+        std::cout << "-------------------------------------\n";
+    }
+
+    void handleChoice(int choice) {
+        switch (choice) {
+            case 1: {
+                std::string username;
+                std::cout << "Enter buyer's username: ";
+                std::cin >> username;
+                platform.addUser(new Buyer(username));
+                break;
+            }
+            case 2: {
+                std::string username;
+                std::cout << "Enter seller's username: ";
+                std::cin >> username;
+                platform.addUser(new Seller(username));
+                break;
+            }
+            case 3: {
+                std::string location;
+                double price;
+                int bedrooms;
+                std::cout << "Enter property location: ";
+                std::cin >> location;
+                std::cout << "Enter property price: $";
+                std::cin >> price;
+                std::cout << "Enter number of bedrooms: ";
+                std::cin >> bedrooms;
+                platform.addProperty(new ResidentialProperty(location, price, bedrooms));
+                break;
+            }
+            case 4: {
+                std::string location;
+                double price;
+                std::string businessType;
+                std::cout << "Enter property location: ";
+                std::cin >> location;
+                std::cout << "Enter property price: $";
+                std::cin >> price;
+                std::cout << "Enter business type: ";
+                std::cin.ignore(); // Ignore newline character
+                std::getline(std::cin, businessType);
+                platform.addProperty(new CommercialProperty(location, price, businessType));
+                break;
+            }
+            case 5: {
+                const auto& users = platform.getUsers();
+                std::cout << "Users on the Platform:" << std::endl;
+                for (const auto& user : users) {
+                    std::cout << "Username: " << user->getUsername() << ", Type: " << user->getUserType() << std::endl;
                 }
-                case 2: {
-                    std::string username;
-                    std::cout << "Enter seller's username: ";
-                    std::cin >> username;
-                    platform.addUser(new Seller(username));
-                    break;
+                break;
+            }
+            case 6: {
+                const auto& properties = platform.getProperties();
+                std::cout << "Properties on the Platform:" << std::endl;
+                for (const auto& property : properties) {
+                    property->display();
                 }
-                case 3: {
-                    std::string location;
-                    double price;
-                    int bedrooms;
-                    std::cout << "Enter property location: ";
-                    std::cin >> location;
-                    std::cout << "Enter property price: $";
-                    std::cin >> price;
-                    std::cout << "Enter number of bedrooms: ";
-                    std::cin >> bedrooms;
-                    platform.addProperty(new ResidentialProperty(location, price, bedrooms));
-                    break;
-                }
-                case 4: {
-                    std::string location;
-                    double price;
-                    std::string businessType;
-                    std::cout << "Enter property location: ";
-                    std::cin >> location;
-                    std::cout << "Enter property price: $";
-                    std::cin >> price;
-                    std::cout << "Enter business type: ";
-                    std::cin.ignore(); // Ignore newline character
-                    std::getline(std::cin, businessType);
-                    platform.addProperty(new CommercialProperty(location, price, businessType));
-                    break;
-                }
-                case 5: {
-                    const auto& users = platform.getUsers();
-                    std::cout << "Users on the Platform:" << std::endl;
-                    for (const auto& user : users) {
-                        std::cout << "Username: " << user->getUsername() << ", Type: " << user->getUserType() << std::endl;
+                break;
+            }
+            case 7: {
+                int buyerIndex, propertyIndex;
+                const auto& users = platform.getUsers();
+                const auto& properties = platform.getProperties();
+
+                std::cout << "Buyers on the Platform:" << std::endl;
+                for (size_t i = 0; i < users.size(); ++i) {
+                    if (users[i]->getUserType() == "Buyer") {
+                        std::cout << i << ". " << users[i]->getUsername() << std::endl;
                     }
-                    break;
                 }
-                case 6: {
-                    const auto& properties = platform.getProperties();
-                    std::cout << "Properties on the Platform:" << std::endl;
-                    for (const auto& property : properties) {
-                        property->display();
-                    }
-                    break;
+                std::cout << "Enter the index of the buyer: ";
+                std::cin >> buyerIndex;
+
+                std::cout << "Properties on the Platform:" << std::endl;
+                for (size_t i = 0; i < properties.size(); ++i) {
+                    std::cout << i << ". ";
+                    properties[i]->display();
                 }
-                case 7: {
-                    int buyerIndex, propertyIndex;
-                    const auto& users = platform.getUsers();
-                    const auto& properties = platform.getProperties();
+                std::cout << "Enter the index of the property to buy: ";
+                std::cin >> propertyIndex;
 
-                    std::cout << "Buyers on the Platform:" << std::endl;
-                    for (size_t i = 0; i < users.size(); ++i) {
-                        if (users[i]->getUserType() == "Buyer") {
-                            std::cout << i << ". " << users[i]->getUsername() << std::endl;
-                        }
-                    }
-                    std::cout << "Enter the index of the buyer: ";
-                    std::cin >> buyerIndex;
+                if (buyerIndex >= 0 && buyerIndex < users.size() &&
+                    propertyIndex >= 0 && propertyIndex < properties.size()) {
+                    Buyer* buyer = dynamic_cast<Buyer*>(users[buyerIndex]);
+                    Property* property = properties[propertyIndex];
 
-                    std::cout << "Properties on the Platform:" << std::endl;
-                    for (size_t i = 0; i < properties.size(); ++i) {
-                        std::cout << i << ". ";
-                        properties[i]->display();
-                    }
-                    std::cout << "Enter the index of the property to buy: ";
-                    std::cin >> propertyIndex;
+                    if (buyer && property) {
+                        buyer->buyProperty(property);
+                        std::cout << "Property bought successfully!\n";
 
-                    if (buyerIndex >= 0 && buyerIndex < users.size() &&
-                        propertyIndex >= 0 && propertyIndex < properties.size()) {
-                        Buyer* buyer = dynamic_cast<Buyer*>(users[buyerIndex]);
-                        Property* property = properties[propertyIndex];
-
-                        if (buyer && property) {
-                            buyer->buyProperty(property);
-                            std::cout << "Property bought successfully!\n";
-
-                            // Display the buyer's information, including the total bill
-                            buyer->display();
-                        } else {
-                            std::cout << "Invalid buyer or property!\n";
-                        }
+                        // Display the buyer's information, including the total bill
+                        buyer->display();
                     } else {
-                        std::cout << "Invalid indices!\n";
+                        std::cout << "Invalid buyer or property!\n";
                     }
-                    break;
+                } else {
+                    std::cout << "Invalid indices!\n";
                 }
-                case 8:
-                    std::cout << "Exiting the program.\n";
-                    break;
-                default:
-                    std::cout << "Invalid choice. Please try again.\n";
+                break;
             }
-        } catch (const std::exception& e) {
-            std::cerr << "Error: " << e.what() << std::endl;
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            case 8:
+                std::cout << "Exiting the program.\n";
+                break;
+            default:
+                std::cout << "Invalid choice. Please try again.\n";
         }
+    }
+};
 
-    } while (choice != 8);
-
+int main() {
+    RealEstatePlatformTester tester;
+    tester.run();
     return 0;
 }
